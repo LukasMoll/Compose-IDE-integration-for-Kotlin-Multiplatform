@@ -15,7 +15,8 @@ fun Application.configureRouting() {
             call.receive<String>()
             call.respondText("not implemented")
         }
-        get("/run-code") {
+        post("/run-code") {
+            call.receive<String>()
             call.response.cacheControl(CacheControl.NoCache(null))
             call.respondTextWriter {
                 write("Streaming response from run-code endpoint")

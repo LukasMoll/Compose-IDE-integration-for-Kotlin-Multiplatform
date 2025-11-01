@@ -38,7 +38,10 @@ class ApplicationTest {
         application {
             module()
         }
-        client.get("/run-code").apply {
+        client.post("/run-code") {
+            contentType(ContentType.Text.Plain)
+            setBody("some code to run")
+        }.apply {
             assertEquals(HttpStatusCode.OK, status)
             val response = bodyAsText()
             assertTrue(response.isNotEmpty())
