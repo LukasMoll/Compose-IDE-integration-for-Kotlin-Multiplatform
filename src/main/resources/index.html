@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code IDE Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #252526;
+            padding: 15px 20px;
+            border-bottom: 1px solid #3e3e42;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .header button {
+            padding: 8px 16px;
+            background-color: #0e639c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .header button:hover {
+            background-color: #1177bb;
+        }
+
+        .header button:active {
+            background-color: #0d5a8f;
+        }
+
+        .header input[type="file"] {
+            display: none;
+        }
+
+        .header label {
+            padding: 8px 16px;
+            background-color: #0e639c;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .header label:hover {
+            background-color: #1177bb;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 1px;
+            background-color: #3e3e42;
+        }
+
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: #1e1e1e;
+        }
+
+        .panel-header {
+            background-color: #252526;
+            padding: 10px 15px;
+            border-bottom: 1px solid #3e3e42;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow: auto;
+            padding: 15px;
+        }
+
+        #codeEditor {
+            width: 100%;
+            height: 100%;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border: none;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 10px;
+            resize: none;
+            outline: none;
+        }
+
+        #codeEditor::selection {
+            background-color: #264f78;
+        }
+
+        #resultPanel {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .validation-message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .validation-error {
+            background-color: #5a1a1a;
+            color: #f48771;
+            border-left: 3px solid #f48771;
+        }
+
+        .validation-success {
+            background-color: #1a4d2e;
+            color: #4ec9b0;
+            border-left: 3px solid #4ec9b0;
+        }
+
+        .validation-loading {
+            background-color: #3e3e42;
+            color: #9cdcfe;
+            border-left: 3px solid #9cdcfe;
+        }
+
+        .scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #464647 #1e1e1e;
+        }
+
+        .scrollbar::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .scrollbar::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb {
+            background: #464647;
+            border-radius: 6px;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #595959;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <label for="fileUpload">Upload File</label>
+        <input type="file" id="fileUpload" accept=".txt,.js,.py,.java,.kt,.cpp,.c,.go,.rs">
+        <button id="runButton">Run Code</button>
+    </div>
+
+    <div class="container">
+        <!-- Left Panel: Code Editor -->
+        <div class="panel">
+            <div class="panel-header">Code</div>
+            <div class="panel-content scrollbar">
+                <textarea id="codeEditor" placeholder="Paste your code here or upload a file..."></textarea>
+            </div>
+        </div>
+
+        <!-- Right Panel: Result -->
+        <div class="panel">
+            <div class="panel-header">Result</div>
+            <div class="panel-content scrollbar" id="resultPanel">
+                <div class="validation-message validation-loading">
+                    Ready for code input...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const codeEditor = document.getElementById('codeEditor');
+        const resultPanel = document.getElementById('resultPanel');
+        const fileUpload = document.getElementById('fileUpload');
+        const runButton = document.getElementById('runButton');
+
+        let validationTimeout;
+
+        // Upload file
+        fileUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    codeEditor.value = event.target.result;
+                    validateCode();
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Validate code on change
+        codeEditor.addEventListener('input', () => {
+            clearTimeout(validationTimeout);
+            validationTimeout = setTimeout(validateCode, 500);
+        });
+
+        // Run code
+        runButton.addEventListener('click', runCode);
+
+        // Validate code function
+        async function validateCode() {
+            const code = codeEditor.value;
+
+            if (!code.trim()) {
+                resultPanel.innerHTML = '<div class="validation-message validation-loading">Ready for code input...</div>';
+                return;
+            }
+
+            resultPanel.innerHTML = '<div class="validation-message validation-loading">Validating code...</div>';
+
+            try {
+                const response = await fetch('/validate-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain',
+                    },
+                    body: code
+                });
+
+                const result = await response.text();
+
+                if (response.ok) {
+                    resultPanel.innerHTML = `<div class="validation-message validation-success">✓ ${result}</div>`;
+                } else {
+                    resultPanel.innerHTML = `<div class="validation-message validation-error">✗ ${result}</div>`;
+                }
+            } catch (error) {
+                resultPanel.innerHTML = `<div class="validation-message validation-error">✗ Error: ${error.message}</div>`;
+            }
+        }
+
+        // Run code function
+        async function runCode() {
+            const code = codeEditor.value;
+
+            if (!code.trim()) {
+                resultPanel.innerHTML = '<div class="validation-message validation-error">✗ Please enter some code first</div>';
+                return;
+            }
+
+            resultPanel.innerHTML = '<div class="validation-message validation-loading">Running code...</div>';
+
+            try {
+                const response = await fetch('/run-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain',
+                    },
+                    body: code
+                });
+
+                const result = await response.text();
+
+                if (response.ok) {
+                    resultPanel.innerHTML = `<div id="runResult">${escapeHtml(result)}</div>`;
+                } else {
+                    resultPanel.innerHTML = `<div class="validation-message validation-error">✗ Error running code</div>`;
+                }
+            } catch (error) {
+                resultPanel.innerHTML = `<div class="validation-message validation-error">✗ Error: ${error.message}</div>`;
+            }
+        }
+
+        // Utility function to escape HTML
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>
+
