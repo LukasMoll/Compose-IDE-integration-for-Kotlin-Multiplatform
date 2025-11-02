@@ -9,11 +9,15 @@ options { tokenVocab = KotlinLexer; }
 // SECTION: general
 
 kotlinFile
-    : shebangLine? NL* fileAnnotation* packageHeader importList topLevelObject* EOF
+    : script
     ;
 
 script
-    : shebangLine? NL* fileAnnotation* packageHeader importList (statement semi)* EOF
+    : shebangLine? NL* fileAnnotation* importList statements? EOF
+    ;
+
+ktcFile
+    : script
     ;
 
 shebangLine
