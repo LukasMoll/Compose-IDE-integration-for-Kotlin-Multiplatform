@@ -4,6 +4,7 @@ val logback_version: String by project
 plugins {
     kotlin("jvm") version "2.2.20"
     id("io.ktor.plugin") version "3.3.1"
+    id("antlr")
 }
 
 group = "com.main"
@@ -13,7 +14,9 @@ application {
     mainClass = "io.ktor.server.netty.EngineMain"
 }
 
+
 dependencies {
+    antlr("org.antlr:antlr4:4.13.2")
     implementation("io.ktor:ktor-server-core")
     implementation("io.ktor:ktor-server-swagger")
     implementation("com.ucasoft.ktor:ktor-simple-cache:0.55.3")
