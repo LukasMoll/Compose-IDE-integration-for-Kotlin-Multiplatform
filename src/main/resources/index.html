@@ -356,15 +356,51 @@
         async function runCode() {
             const code = codeEditor.value;
             if (!code.trim()) { renderStatus('✗ Please enter some code first', 'error'); return; }
-            renderStatus('Running code...', 'loading');
+
+            // Clear previous output and show running status
+            resultPanel.innerHTML = '<div id="runResult" style="font-family: monospace; white-space: pre-wrap;"></div>';
+            const runResult = document.getElementById('runResult');
+
             try {
-                const response = await fetch('/run-code', { method: 'POST', headers: {'Content-Type': 'text/plain'}, body: code });
-                const text = await response.text();
-                if (response.ok) {
-                    resultPanel.innerHTML = `<div id="runResult">${escapeHtml(text)}</div>`;
-                } else {
+                const response = await fetch('/run-code', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'text/plain'},
+                    body: code
+                });
+
+                if (!response.ok) {
                     renderStatus('✗ Error running code', 'error');
+                    return;
                 }
+
+                // Get the reader from the response body stream
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                let accumulatedText = '';
+
+                // Read the stream chunk by chunk
+                while (true) {
+                    const { done, value } = await reader.read();
+
+                    if (done) {
+                        break;
+                    }
+
+                    // Decode the chunk and append to accumulated text
+                    const chunk = decoder.decode(value, { stream: true });
+                    accumulatedText += chunk;
+
+                    // Update the display immediately with the new content
+                    runResult.textContent = accumulatedText;
+
+                    // Auto-scroll to bottom to show latest output
+                    resultPanel.scrollTop = resultPanel.scrollHeight;
+                }
+
+                // Final update after stream is complete
+                runResult.textContent = accumulatedText;
+
             } catch (e) {
                 renderStatus(`✗ ${escapeHtml(String(e))}`, 'error');
             }

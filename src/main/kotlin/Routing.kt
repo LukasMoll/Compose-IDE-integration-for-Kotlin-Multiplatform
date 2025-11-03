@@ -14,18 +14,17 @@ fun Application.configureRouting() {
         get("/") {
             call.respondRedirect("/index.html")
         }
+
         post("/validate-code") {
             val code = call.receive<String>()
             val result = KotlinParserService.parse(code)
             call.respondText(KotlinParserService.toJson(result), ContentType.Application.Json)
         }
+
         post("/run-code") {
-            call.receive<String>()
-            call.response.cacheControl(CacheControl.NoCache(null))
-            call.respondTextWriter {
-                write("Streaming response from run-code endpoint")
-                flush()
-            }
+            val code = call.receive<String>()
+            KotlinScriptRunner.runScript(call, code)
         }
     }
 }
+
