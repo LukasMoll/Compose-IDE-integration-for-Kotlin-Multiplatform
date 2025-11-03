@@ -26,10 +26,12 @@ class ApplicationTest {
         }
         client.post("/validate-code") {
             contentType(ContentType.Text.Plain)
-            setBody("some code to validate")
+            setBody("fun main() { println(\"Hello\") }")
         }.apply {
             assertEquals(HttpStatusCode.OK, status)
-            assertEquals("not implemented", bodyAsText())
+            val response = bodyAsText()
+            assertTrue(response.contains("\"tokens\""), "Response should contain tokens: $response")
+            assertTrue(response.contains("\"errors\""), "Response should contain errors field: $response")
         }
     }
 
@@ -40,14 +42,11 @@ class ApplicationTest {
         }
         client.post("/run-code") {
             contentType(ContentType.Text.Plain)
-            setBody("some code to run")
+            setBody("println(\"Hello from Kotlin script\")")
         }.apply {
             assertEquals(HttpStatusCode.OK, status)
             val response = bodyAsText()
-            assertTrue(response.isNotEmpty())
-            assertTrue(response.contains("Streaming response from run-code endpoint"))
+            assertTrue(response.contains("Hello from Kotlin script"), "Expected script output in response: $response")
         }
     }
-
-
 }

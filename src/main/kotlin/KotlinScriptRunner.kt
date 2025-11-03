@@ -20,27 +20,33 @@ object KotlinScriptRunner {
                 .start()
 
             call.respondTextWriter(ContentType.Text.Plain) {
-                val reader = BufferedReader(InputStreamReader(process.inputStream))
-                var line: String?
+                try {
+                    val reader = BufferedReader(InputStreamReader(process.inputStream))
+                    var line: String?
 
-                while (reader.readLine().also { line = it } != null) {
-                    write(line + "\n")
-                    flush()
-                }
+                    while (reader.readLine().also { line = it } != null) {
+                        write(line + "\n")
+                        flush()
+                    }
 
-                val exitCode = process.waitFor()
-                if (exitCode != 0) {
-                    write("\n[Process exited with code $exitCode]\n")
-                    flush()
+                    val exitCode = process.waitFor()
+                    if (exitCode != 0) {
+                        write("\n[Process exited with code $exitCode]\n")
+                        flush()
+                    }
+                } finally {
+                    tempFile.delete()
                 }
             }
         } catch (e: Exception) {
-            call.respondTextWriter(ContentType.Text.Plain) {
-                write("Error executing script: ${e.message}\n")
-                flush()
+            try {
+                call.respondTextWriter(ContentType.Text.Plain) {
+                    write("Error executing script: ${e.message}\n")
+                    flush()
+                }
+            } finally {
+                tempFile.delete()
             }
-        } finally {
-            tempFile.delete()
         }
     }
 }
