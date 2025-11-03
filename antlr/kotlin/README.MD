@@ -1,0 +1,1 @@
+These are the official grammar source files from the [kotlin-spec repository](https://github.com/Kotlin/kotlin-spec/tree/release/grammar/src/main/antlr).
