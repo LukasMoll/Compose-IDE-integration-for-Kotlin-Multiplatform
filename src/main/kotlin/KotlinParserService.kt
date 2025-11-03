@@ -13,10 +13,17 @@ data class TokenInfo(
     val column: Int
 )
 
+data class ErrorInfo(
+    val line: Int,
+    val column: Int,
+    val message: String
+)
+
 data class ParseResult(
     val tokens: List<TokenInfo>,
     val hasErrors: Boolean,
-    val errors: List<String>
+    val errors: List<String>,
+    val errorLocations: List<ErrorInfo>
 )
 
 object KotlinParserService {
@@ -24,6 +31,7 @@ object KotlinParserService {
 
     fun parse(code: String): ParseResult {
         val errors = mutableListOf<String>()
+        val errorLocations = mutableListOf<ErrorInfo>()
         val input = CharStreams.fromString(code)
         val lexer = KotlinLexer(input).apply {
             removeErrorListeners()
@@ -40,7 +48,9 @@ object KotlinParserService {
                     msg: String?,
                     e: RecognitionException?
                 ) {
-                    errors.add("Line $line:$charPositionInLine $msg")
+                    val errorMsg = "Line $line:$charPositionInLine $msg"
+                    errors.add(errorMsg)
+                    errorLocations.add(ErrorInfo(line, charPositionInLine, msg ?: "Syntax error"))
                 }
             })
         }
@@ -95,7 +105,8 @@ object KotlinParserService {
         return ParseResult(
             tokens = collected,
             hasErrors = errors.isNotEmpty(),
-            errors = errors
+            errors = errors,
+            errorLocations = errorLocations
         )
     }
 
@@ -226,10 +237,23 @@ object KotlinParserService {
             "\"${escapeJson(error)}\""
         }
 
+        val errorLocationsJson = result.errorLocations.joinToString(
+            separator = ",",
+            prefix = "[",
+            postfix = "]"
+        ) { errorLoc ->
+            "{" +
+                "\"line\":${errorLoc.line}," +
+                "\"column\":${errorLoc.column}," +
+                "\"message\":\"${escapeJson(errorLoc.message)}\"" +
+            "}"
+        }
+
         return "{" +
             "\"tokens\":$tokensJson," +
             "\"hasErrors\":${result.hasErrors}," +
-            "\"errors\":$errorsJson" +
+            "\"errors\":$errorsJson," +
+            "\"errorLocations\":$errorLocationsJson" +
         "}"
     }
 }

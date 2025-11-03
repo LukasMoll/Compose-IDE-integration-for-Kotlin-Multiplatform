@@ -49,4 +49,21 @@ class ApplicationTest {
             assertTrue(response.contains("Hello from Kotlin script"), "Expected script output in response: $response")
         }
     }
+
+    @Test
+    fun testValidateCodeWithErrors() = testApplication {
+        application {
+            module()
+        }
+        client.post("/validate-code") {
+            contentType(ContentType.Text.Plain)
+            setBody("fun main() { invalid syntax here }")
+        }.apply {
+            assertEquals(HttpStatusCode.OK, status)
+            val response = bodyAsText()
+            assertTrue(response.contains("\"tokens\""), "Response should contain tokens: $response")
+            assertTrue(response.contains("\"hasErrors\":true"), "Response should indicate errors: $response")
+            assertTrue(response.contains("\"errorLocations\""), "Response should contain errorLocations: $response")
+        }
+    }
 }

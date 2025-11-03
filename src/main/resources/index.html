@@ -309,7 +309,7 @@
                         return;
                     }
                     if (json.hasErrors) {
-                        highlightedCode.innerHTML = `<span class="token-error">${escapeHtml(code)}</span>`;
+                        applyHighlight(code, json.tokens, json.errorLocations || []);
                         const errs = (json.errors || []).join('\n');
                         renderStatus(`✗ Parsing errors\n${errs}`, 'error');
                         return;
@@ -332,17 +332,21 @@
             }
         }
 
-        function applyHighlight(code, tokens) {
+        function applyHighlight(code, tokens, errorLocations = []) {
             // Build linear index for each token
             const lineOffsets = [];
             let offset = 0; const lines = code.split('\n');
             for (let i = 0; i < lines.length; i++) { lineOffsets[i + 1] = offset; offset += lines[i].length + 1; }
+
+            const errorLines = new Set(errorLocations.map(err => err.line));
+
             let html = ''; let last = 0;
             const sorted = tokens.slice().sort((a,b)=> a.line - b.line || a.column - b.column);
             for (const t of sorted) {
                 const pos = (lineOffsets[t.line] ?? 0) + (t.column ?? 0);
                 if (pos > last) html += escapeHtml(code.slice(last, pos));
-                const cls = `token-${t.type || 'default'}`;
+
+                const cls = errorLines.has(t.line) ? 'token-error' : `token-${t.type || 'default'}`;
                 const text = code.substr(pos, t.text?.length ?? 0);
                 html += `<span class="${cls}">${escapeHtml(text)}</span>`;
                 last = pos + (t.text?.length ?? 0);
