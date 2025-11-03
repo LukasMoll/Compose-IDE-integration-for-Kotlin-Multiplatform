@@ -16,7 +16,7 @@ application {
 
 
 dependencies {
-    antlr("org.antlr:antlr4:4.13.2")
+    antlr("org.antlr:antlr4:4.8")
     implementation("io.ktor:ktor-server-core")
     implementation("io.ktor:ktor-server-swagger")
     implementation("com.ucasoft.ktor:ktor-simple-cache:0.55.3")
@@ -26,6 +26,7 @@ dependencies {
     implementation("io.ktor:ktor-server-netty")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("io.ktor:ktor-server-config-yaml")
+    implementation("org.antlr:antlr4-runtime:4.8")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
