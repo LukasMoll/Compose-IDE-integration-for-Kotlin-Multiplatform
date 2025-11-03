@@ -1,6 +1,4 @@
-package kotlinParser;
-// Generated from /Users/user/IdeaProjects/kotlin_ide_integration/antlr/kotlin/KotlinParser.g4 by ANTLR 4.13.2
-
+package generated.kotlinParser;// Generated from /Users/user/IdeaProjects/kotlin_ide_integration/antlr/kotlin/KotlinParser.g4 by ANTLR 4.13.2
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**
@@ -27,6 +25,13 @@ public class KotlinParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitScript(KotlinParser.ScriptContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitKtcFile(KotlinParser.KtcFileContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

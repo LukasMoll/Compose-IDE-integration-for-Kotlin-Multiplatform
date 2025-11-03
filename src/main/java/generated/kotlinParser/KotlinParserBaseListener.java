@@ -1,5 +1,5 @@
 // Generated from KotlinParser.g4 by ANTLR 4.8
-package kotlinParser;
+package generated.kotlinParser;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -35,6 +35,18 @@ public class KotlinParserBaseListener implements KotlinParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitScript(KotlinParser.ScriptContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterKtcFile(KotlinParser.KtcFileContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitKtcFile(KotlinParser.KtcFileContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

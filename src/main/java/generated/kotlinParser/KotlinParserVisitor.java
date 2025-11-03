@@ -1,6 +1,4 @@
-package kotlinParser;
-// Generated from /Users/user/IdeaProjects/kotlin_ide_integration/antlr/kotlin/KotlinParser.g4 by ANTLR 4.13.2
-
+package generated.kotlinParser;// Generated from /Users/user/IdeaProjects/kotlin_ide_integration/antlr/kotlin/KotlinParser.g4 by ANTLR 4.13.2
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -23,6 +21,12 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitScript(KotlinParser.ScriptContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#ktcFile}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitKtcFile(KotlinParser.KtcFileContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#shebangLine}.
 	 * @param ctx the parse tree

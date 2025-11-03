@@ -1,5 +1,5 @@
 // Generated from UnicodeClasses.g4 by ANTLR 4.8
-package kotlinParser;
+package generated.kotlinParser;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATN;

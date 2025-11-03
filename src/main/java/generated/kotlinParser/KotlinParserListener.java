@@ -1,5 +1,5 @@
 // Generated from KotlinParser.g4 by ANTLR 4.8
-package kotlinParser;
+package generated.kotlinParser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
@@ -27,6 +27,16 @@ public interface KotlinParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitScript(KotlinParser.ScriptContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link KotlinParser#ktcFile}.
+	 * @param ctx the parse tree
+	 */
+	void enterKtcFile(KotlinParser.KtcFileContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link KotlinParser#ktcFile}.
+	 * @param ctx the parse tree
+	 */
+	void exitKtcFile(KotlinParser.KtcFileContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link KotlinParser#shebangLine}.
 	 * @param ctx the parse tree
