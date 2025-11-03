@@ -15,8 +15,9 @@ fun Application.configureRouting() {
             call.respondRedirect("/index.html")
         }
         post("/validate-code") {
-            call.receive<String>()
-            call.respondText("not implemented")
+            val code = call.receive<String>()
+            val result = KotlinParserService.parse(code)
+            call.respondText(KotlinParserService.toJson(result), ContentType.Application.Json)
         }
         post("/run-code") {
             call.receive<String>()

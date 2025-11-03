@@ -96,212 +96,284 @@
             padding: 15px;
         }
 
+        /* Overlay highlighter */
+        #codeEditorContainer { position: relative; width: 100%; height: 100%; }
+        #highlightedCode {
+            position: absolute; inset: 0; overflow: auto; padding: 10px;
+            font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.5;
+            color: #d4d4d4; white-space: pre-wrap; word-wrap: break-word; pointer-events: none;
+            background: #1e1e1e; z-index: 0;
+        }
         #codeEditor {
-            width: 100%;
-            height: 100%;
-            background-color: #1e1e1e;
-            color: #d4d4d4;
-            border: none;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            padding: 10px;
-            resize: none;
-            outline: none;
+            position: relative; z-index: 1; width: 100%; height: 100%;
+            background: transparent; color: transparent; caret-color: #d4d4d4;
+            border: none; outline: none; resize: none; padding: 10px;
+            font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.5;
         }
+        #codeEditor::selection { background-color: #264f78; }
 
-        #codeEditor::selection {
-            background-color: #264f78;
-        }
+        /* Comments */
+        .token-comment { color: #7a7e85; font-style: italic; }
 
-        #resultPanel {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.5;
-        }
+        /* Control flow keywords (purple/magenta) */
+        .token-control-flow { color: #c586c0; font-weight: bold; }
 
-        .validation-message {
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            font-size: 13px;
-        }
+        /* Declaration keywords (orange) */
+        .token-declaration { color: #cf8e6d; font-weight: bold; }
 
-        .validation-error {
-            background-color: #5a1a1a;
-            color: #f48771;
-            border-left: 3px solid #f48771;
-        }
+        /* Reference keywords (blue) */
+        .token-reference { color: #4fc1ff; font-weight: bold; }
 
-        .validation-success {
-            background-color: #1a4d2e;
-            color: #4ec9b0;
-            border-left: 3px solid #4ec9b0;
-        }
+        /* Type operators (cyan) */
+        .token-type-operator { color: #4ec9b0; font-weight: bold; }
 
-        .validation-loading {
-            background-color: #3e3e42;
-            color: #9cdcfe;
-            border-left: 3px solid #9cdcfe;
-        }
+        /* Generic keywords (light orange) */
+        .token-keyword { color: #cf8e6d; }
 
-        .scrollbar {
-            scrollbar-width: thin;
-            scrollbar-color: #464647 #1e1e1e;
-        }
+        /* Visibility modifiers (yellow/gold) */
+        .token-visibility { color: #dcdcaa; font-style: italic; }
 
-        .scrollbar::-webkit-scrollbar {
-            width: 12px;
-        }
+        /* Class modifiers (bright orange) */
+        .token-class-modifier { color: #ff9933; font-style: italic; }
 
-        .scrollbar::-webkit-scrollbar-track {
-            background: #1e1e1e;
-        }
+        /* Function modifiers (light orange) */
+        .token-function-modifier { color: #d4a574; font-style: italic; }
 
-        .scrollbar::-webkit-scrollbar-thumb {
-            background: #464647;
-            border-radius: 6px;
-        }
+        /* Parameter modifiers (light blue) */
+        .token-parameter-modifier { color: #9cdcfe; font-style: italic; }
 
-        .scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #595959;
-        }
+        /* Platform modifiers (pink) */
+        .token-platform-modifier { color: #ff66cc; font-style: italic; }
+
+        /* Annotation targets (light purple) */
+        .token-annotation-target { color: #b8a3d6; }
+
+        /* Literals (light blue) */
+        .token-literal { color: #569cd6; font-weight: bold; }
+
+        /* Strings */
+        .token-string { color: #6aab73; }
+
+        /* Numbers */
+        .token-number { color: #b5cea8; }
+
+        /* Brackets (bright yellow) */
+        .token-bracket { color: #ffd700; font-weight: bold; }
+
+        /* Annotations (yellow/gold) */
+        .token-annotation { color: #bbb529; }
+
+        /* Operators (white) */
+        .token-operator { color: #d4d4d4; }
+
+        /* Punctuation (light gray) */
+        .token-punctuation { color: #bbbbbb; }
+
+        /* Identifiers */
+        .token-identifier { color: #d4d4d4; }
+
+        /* Default */
+        .token-default { color: #d4d4d4; }
+
+        /* Errors */
+        .token-error { color: #f44747; text-decoration: underline wavy #f44747; }
     </style>
 </head>
 <body>
     <div class="header">
         <label for="fileUpload">Upload File</label>
-        <input type="file" id="fileUpload" accept=".txt,.js,.py,.java,.kt,.cpp,.c,.go,.rs">
+        <input type="file" id="fileUpload" accept=".kts">
         <button id="runButton">Run Code</button>
     </div>
 
     <div class="container">
-        <!-- Left Panel: Code Editor -->
         <div class="panel">
             <div class="panel-header">Code</div>
             <div class="panel-content scrollbar">
-                <textarea id="codeEditor" placeholder="Paste your code here or upload a file..."></textarea>
+                <div id="codeEditorContainer">
+                    <div id="highlightedCode" class="scrollbar"></div>
+                    <textarea id="codeEditor" placeholder="Paste your code here or upload a file..." spellcheck="false"></textarea>
+                </div>
             </div>
         </div>
-
-        <!-- Right Panel: Result -->
         <div class="panel">
             <div class="panel-header">Result</div>
             <div class="panel-content scrollbar" id="resultPanel">
-                <div class="validation-message validation-loading">
-                    Ready for code input...
-                </div>
+                <div class="validation-message validation-loading">Ready for code input...</div>
             </div>
         </div>
     </div>
 
     <script>
         const codeEditor = document.getElementById('codeEditor');
+        const highlightedCode = document.getElementById('highlightedCode');
         const resultPanel = document.getElementById('resultPanel');
         const fileUpload = document.getElementById('fileUpload');
         const runButton = document.getElementById('runButton');
 
-        let validationTimeout;
+        const PARSE_DEBOUNCE_MS = 300; // faster response for better UX
 
-        // Upload file
+        let validationTimeout;
+        let currentController = null;
+        let docVersion = 0; // increment on each edit
+        let lastCode = '';
+        let lastHighlightedCode = '';
+
+        // Scroll sync (passive for smoother scrolling)
+        codeEditor.addEventListener('scroll', () => {
+            highlightedCode.scrollTop = codeEditor.scrollTop;
+            highlightedCode.scrollLeft = codeEditor.scrollLeft;
+        }, { passive: true });
+
+        // Upload
         fileUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    codeEditor.value = event.target.result;
-                    validateCode();
-                };
-                reader.readAsText(file);
-            }
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                codeEditor.value = event.target.result;
+                handleInputChange();
+            };
+            reader.readAsText(file);
         });
 
-        // Validate code on change
-        codeEditor.addEventListener('input', () => {
+        // Instant visual update - preserve colors while typing
+        codeEditor.addEventListener('input', handleInputChange);
+        function handleInputChange() {
+            docVersion++;
+            const code = codeEditor.value;
+
+            // Immediate update: show all text with preserved highlighting where possible
+            updateOverlayFast(code);
+
+            // Debounced server parsing for accurate highlight
             clearTimeout(validationTimeout);
-            validationTimeout = setTimeout(validateCode, 500);
-        });
+            validationTimeout = setTimeout(() => scheduleServerParse(code, docVersion), PARSE_DEBOUNCE_MS);
+        }
 
-        // Run code
+        function updateOverlayFast(code) {
+            // If we have existing HTML highlighting, try to preserve it intelligently
+            if (lastHighlightedCode && code.startsWith(lastCode)) {
+                // User is typing at the end - append new text
+                const newText = code.substring(lastCode.length);
+                if (newText) {
+                    const span = document.createElement('span');
+                    span.className = 'token-default';
+                    span.textContent = newText;
+                    highlightedCode.appendChild(span);
+                }
+            } else if (lastHighlightedCode && lastCode.startsWith(code)) {
+                // User is deleting from the end - trim overlay
+                const textContent = highlightedCode.textContent || '';
+                if (textContent.length > code.length) {
+                    highlightedCode.textContent = code;
+                }
+            } else {
+                // Major change (paste, delete middle, etc) - show all as plain text
+                highlightedCode.textContent = code;
+            }
+            lastCode = code;
+        }
+
+        // Initial state
+        renderStatus('Ready for code input...', 'loading');
+
         runButton.addEventListener('click', runCode);
 
-        // Validate code function
-        async function validateCode() {
-            const code = codeEditor.value;
+        function renderStatus(message, kind) {
+            const cls = kind === 'error' ? 'validation-error'
+                      : kind === 'success' ? 'validation-success'
+                      : 'validation-loading';
+            resultPanel.innerHTML = `<div class="validation-message ${cls}">${escapeHtml(message)}</div>`;
+        }
 
-            if (!code.trim()) {
-                resultPanel.innerHTML = '<div class="validation-message validation-loading">Ready for code input...</div>';
-                return;
-            }
 
-            resultPanel.innerHTML = '<div class="validation-message validation-loading">Validating code...</div>';
+        function scheduleServerParse(code, version) {
+            // Abort any in-flight parse
+            if (currentController) { try { currentController.abort(); } catch(_){} }
+            currentController = new AbortController();
+            const signal = currentController.signal;
 
-            try {
-                const response = await fetch('/validate-code', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain',
-                    },
-                    body: code
+            // Use idle time if available
+            const doFetch = () => {
+                renderStatus('Validating code...', 'loading');
+                fetch('/validate-code', {
+                    method: 'POST', headers: {'Content-Type': 'text/plain'}, body: code, signal
+                })
+                .then(r => r.json())
+                .then(json => {
+                    if (version !== docVersion) return; // stale result; ignore
+                    if (!json || !Array.isArray(json.tokens)) {
+                        highlightedCode.innerHTML = `<span class="token-error">${escapeHtml(code)}</span>`;
+                        renderStatus('✗ Parser returned invalid result', 'error');
+                        return;
+                    }
+                    if (json.hasErrors) {
+                        highlightedCode.innerHTML = `<span class="token-error">${escapeHtml(code)}</span>`;
+                        const errs = (json.errors || []).join('\n');
+                        renderStatus(`✗ Parsing errors\n${errs}`, 'error');
+                        return;
+                    }
+                    applyHighlight(code, json.tokens);
+                    renderStatus('✓ Code is valid', 'success');
+                })
+                .catch(err => {
+                    if (signal.aborted) return; // ignore aborted requests
+                    if (version !== docVersion) return;
+                    highlightedCode.innerHTML = `<span class="token-error">${escapeHtml(code)}</span>`;
+                    renderStatus(`✗ ${String(err)}`, 'error');
                 });
+            };
 
-                const result = await response.text();
-
-                if (response.ok) {
-                    resultPanel.innerHTML = `<div class="validation-message validation-success">✓ ${result}</div>`;
-                } else {
-                    resultPanel.innerHTML = `<div class="validation-message validation-error">✗ ${result}</div>`;
-                }
-            } catch (error) {
-                resultPanel.innerHTML = `<div class="validation-message validation-error">✗ Error: ${error.message}</div>`;
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(doFetch, { timeout: PARSE_DEBOUNCE_MS });
+            } else {
+                setTimeout(doFetch, 0);
             }
         }
 
-        // Run code function
+        function applyHighlight(code, tokens) {
+            // Build linear index for each token
+            const lineOffsets = [];
+            let offset = 0; const lines = code.split('\n');
+            for (let i = 0; i < lines.length; i++) { lineOffsets[i + 1] = offset; offset += lines[i].length + 1; }
+            let html = ''; let last = 0;
+            const sorted = tokens.slice().sort((a,b)=> a.line - b.line || a.column - b.column);
+            for (const t of sorted) {
+                const pos = (lineOffsets[t.line] ?? 0) + (t.column ?? 0);
+                if (pos > last) html += escapeHtml(code.slice(last, pos));
+                const cls = `token-${t.type || 'default'}`;
+                const text = code.substr(pos, t.text?.length ?? 0);
+                html += `<span class="${cls}">${escapeHtml(text)}</span>`;
+                last = pos + (t.text?.length ?? 0);
+            }
+            if (last < code.length) html += escapeHtml(code.slice(last));
+            highlightedCode.innerHTML = html;
+            lastHighlightedCode = code;
+            lastCode = code;
+        }
+
         async function runCode() {
             const code = codeEditor.value;
-
-            if (!code.trim()) {
-                resultPanel.innerHTML = '<div class="validation-message validation-error">✗ Please enter some code first</div>';
-                return;
-            }
-
-            resultPanel.innerHTML = '<div class="validation-message validation-loading">Running code...</div>';
-
+            if (!code.trim()) { renderStatus('✗ Please enter some code first', 'error'); return; }
+            renderStatus('Running code...', 'loading');
             try {
-                const response = await fetch('/run-code', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain',
-                    },
-                    body: code
-                });
-
-                const result = await response.text();
-
+                const response = await fetch('/run-code', { method: 'POST', headers: {'Content-Type': 'text/plain'}, body: code });
+                const text = await response.text();
                 if (response.ok) {
-                    resultPanel.innerHTML = `<div id="runResult">${escapeHtml(result)}</div>`;
+                    resultPanel.innerHTML = `<div id="runResult">${escapeHtml(text)}</div>`;
                 } else {
-                    resultPanel.innerHTML = `<div class="validation-message validation-error">✗ Error running code</div>`;
+                    renderStatus('✗ Error running code', 'error');
                 }
-            } catch (error) {
-                resultPanel.innerHTML = `<div class="validation-message validation-error">✗ Error: ${error.message}</div>`;
+            } catch (e) {
+                renderStatus(`✗ ${escapeHtml(String(e))}`, 'error');
             }
         }
 
-        // Utility function to escape HTML
         function escapeHtml(text) {
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            return text.replace(/[&<>"']/g, m => map[m]);
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return String(text).replace(/[&<>"']/g, m => map[m]);
         }
     </script>
 </body>
 </html>
-
