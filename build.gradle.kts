@@ -7,6 +7,10 @@ plugins {
     id("antlr")
 }
 
+repositories {
+    mavenCentral()
+}
+
 group = "com.main"
 version = "0.0.1"
 
@@ -29,4 +33,19 @@ dependencies {
     implementation("org.antlr:antlr4-runtime:4.8")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    testImplementation("com.microsoft.playwright:playwright:1.48.0")
+}
+
+val playwrightInstall by tasks.registering(JavaExec::class) {
+    group = "verification"
+    description = "Install Playwright browsers for E2E tests"
+    mainClass.set("com.microsoft.playwright.CLI")
+    classpath = sourceSets.test.get().runtimeClasspath
+    args = listOf("install", "--with-deps")
+}
+
+tasks.test {
+    dependsOn(playwrightInstall)
+    systemProperty("playwright.nodejs.compression.level", "9")
+    systemProperty("playwright.cli.atomic.install", "true")
 }
