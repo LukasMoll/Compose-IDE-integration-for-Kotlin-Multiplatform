@@ -7,15 +7,14 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.openapi.*
 import io.ktor.server.plugins.swagger.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Application.configureHTTP() {
     routing {
-        swaggerUI(path = "openapi")
+        swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
     }
     routing {
-        openAPI(path = "openapi")
+        openAPI(path = "openapi", swaggerFile = "openapi/documentation.yaml")
     }
     install(CORS) {
         allowMethod(HttpMethod.Options)

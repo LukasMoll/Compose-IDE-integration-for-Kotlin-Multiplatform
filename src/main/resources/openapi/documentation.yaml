@@ -1,23 +1,76 @@
 openapi: "3.0.3"
 info:
-  title: "Application API"
-  description: "Application API"
+  title: "Kotlin IDE Integration API"
+  description: "API for Kotlin code validation and execution"
   version: "1.0.0"
 servers:
   - url: "http://0.0.0.0:8080"
+    description: "Local development server"
 paths:
   /:
     get:
-      description: "Hello World!"
+      summary: "Redirect to index page"
+      description: "Redirects to the main index.html page"
+      responses:
+        "302":
+          description: "Redirect to /index.html"
+          headers:
+            Location:
+              schema:
+                type: "string"
+                example: "/index.html"
+  /validate-code:
+    post:
+      summary: "Validate Kotlin code"
+      description: "Parses and validates Kotlin code syntax"
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: "string"
+              description: "Kotlin code to validate"
+              example: |
+                fun main() {
+                    println("Hello, World!")
+                }
       responses:
         "200":
-          description: "OK"
+          description: "Validation result"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                description: "Parse result with syntax information"
+              examples:
+                Example#1:
+                  value: |
+                    {
+                      "success": true,
+                      "errors": []
+                    }
+  /run-code:
+    post:
+      summary: "Execute Kotlin code"
+      description: "Compiles and runs the provided Kotlin code"
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: "string"
+              description: "Kotlin code to execute"
+              example: |
+                fun main() {
+                    println("Hello, World!")
+                }
+      responses:
+        "200":
+          description: "Execution result"
           content:
             text/plain:
               schema:
                 type: "string"
-              examples:
-                Example#1:
-                  value: "Hello World!"
+                description: "Output from the executed code"
 components:
-  schemas: { }
+  schemas: {}
