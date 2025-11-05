@@ -57,7 +57,7 @@ class ApplicationTest {
         }
         client.post("/validate-code") {
             contentType(ContentType.Text.Plain)
-            setBody("fun main() { invalid syntax here }")
+            setBody("fun main() { val x = }")
         }.apply {
             assertEquals(HttpStatusCode.OK, status)
             val response = bodyAsText()
