@@ -6,6 +6,8 @@ This project is a Ktor-based backend server that provides IDE-like features for 
 
 **[Try the live application here!](https://kotlin-ide-app-22323.wonderfulsmoke-e4f4394a.westeurope.azurecontainerapps.io/)**
 
+> **Note:** The live application is really slow and it's recommended to run it locally for better performance.
+
 ## Features
 
 - **File Upload**: Upload Kotlin scripts.
